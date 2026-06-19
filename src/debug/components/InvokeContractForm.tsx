@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Badge,
@@ -81,12 +81,13 @@ export const InvokeContractForm = ({
   });
   const [formError, setFormError] = useState<AnyObject>({});
   // Based on whether the function requires input arguments
-  const [isGetFunction, setIsGetFunction] = useState(false);
   // Based on reads and writes to the contract
   // Can only be determined based on the simulation result
   const [isWriteFn, setIsWriteFn] = useState<boolean | undefined>(undefined);
-  const [dereferencedSchema, setDereferencedSchema] =
-    useState<DereferencedSchemaType | null>(null);
+  const dereferencedSchema = useMemo<DereferencedSchemaType | null>(() => {
+    if (!contractSpec) return null;
+    return dereferenceSchema(contractSpec.jsonSchema(funcName), funcName);
+  }, [contractSpec, funcName]);
   // used to delay the simulation until after the sequence number is fetched
   const [isSimulationQueued, setSimulationQueued] = useState(false);
   // Used to delay a submit until after a simulation is complete
@@ -164,17 +165,17 @@ export const InvokeContractForm = ({
     return null;
   };
 
-  useEffect(() => {
-    if (contractSpec) {
-      const schema = dereferenceSchema(
-        contractSpec?.jsonSchema(funcName),
-        funcName,
-      );
-
-      setDereferencedSchema(schema);
+  const resetSubmitState = () => {
+    if (submitRpcError || submitRpcResponse) {
+      resetSubmitRpc();
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-  }, [contractSpec, funcName]);
+  };
+
+  const resetSimulateState = () => {
+    if (isSimulateTxError || (simulateTxData && "result" in simulateTxData)) {
+      resetSimulateTx();
+    }
+  };
 
   const triggerSubmit = async () => {
     setSubmissionQueued(false);
@@ -309,6 +310,7 @@ export const InvokeContractForm = ({
         result.stateChanges && result.stateChanges.length > 0;
 
       if (isSubmitQueued && !isSimulationQueued && prepareTxData) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         void triggerSubmit();
       }
 
@@ -329,6 +331,7 @@ export const InvokeContractForm = ({
 
   useEffect(() => {
     if (isSimulationQueued && !isFetchingSequenceNumber) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       void triggerSimulate();
     }
   }, [sequenceNumberData, isFetchingSequenceNumber, isSimulationQueued]);
@@ -346,18 +349,6 @@ export const InvokeContractForm = ({
     isFetchingSequenceNumber ||
     isSimulateTxPending ||
     isPrepareTxPending;
-
-  const resetSubmitState = () => {
-    if (submitRpcError || submitRpcResponse) {
-      resetSubmitRpc();
-    }
-  };
-
-  const resetSimulateState = () => {
-    if (isSimulateTxError || (simulateTxData && "result" in simulateTxData)) {
-      resetSimulateTx();
-    }
-  };
 
   const renderReadWriteBadge = (isWriteFn: boolean | undefined) => {
     if (isWriteFn === undefined) return null;
@@ -432,13 +423,10 @@ export const InvokeContractForm = ({
   const isEmptySchema =
     Object.entries(dereferencedSchema?.properties || {}).length === 0;
 
-  useEffect(() => {
-    if (dereferencedSchema && !dereferencedSchema?.required.length) {
-      setIsGetFunction(true);
-    } else {
-      setIsGetFunction(false);
-    }
-  }, [dereferencedSchema]);
+  const isGetFunction = useMemo(
+    () => Boolean(dereferencedSchema && !dereferencedSchema.required.length),
+    [dereferencedSchema],
+  );
 
   const renderSchema = () => {
     if (!contractSpec || !contractSpec.jsonSchema) {
@@ -513,10 +501,7 @@ export const InvokeContractForm = ({
                     : {}),
                 }}
               >
-                <PrettyJsonTransaction
-                  json={result}
-                  xdr={"xdr" in result}
-                />
+                <PrettyJsonTransaction json={result} xdr={"xdr" in result} />
               </div>
             </Box>
           }
