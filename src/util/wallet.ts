@@ -2,7 +2,6 @@ import storage from "./storage";
 import {
   ISupportedWallet,
   StellarWalletsKit,
-  WalletNetwork,
   sep43Modules,
 } from "@creit.tech/stellar-wallets-kit";
 import { Horizon } from "@stellar/stellar-sdk";

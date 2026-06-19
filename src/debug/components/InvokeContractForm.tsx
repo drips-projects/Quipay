@@ -171,92 +171,9 @@ export const InvokeContractForm = ({
         funcName,
       );
 
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDereferencedSchema(schema);
     }
   }, [contractSpec, funcName]);
-
-  const isSuccessfulSimulation =
-    simulateTxData &&
-    "result" in simulateTxData &&
-    !simulateTxData.result.error;
-
-  const isFailedSimulation =
-    simulateTxData && "result" in simulateTxData && simulateTxData.result.error;
-
-  useEffect(() => {
-    if (isSuccessfulSimulation) {
-      const result =
-        simulateTxData.result as Api.RawSimulateTransactionResponse;
-      const simulationChangesState =
-        result.stateChanges && result.stateChanges.length > 0;
-
-      if (isSubmitQueued && !isSimulationQueued && prepareTxData) {
-        void triggerSubmit();
-      }
-
-      if (simulationChangesState) {
-        setIsWriteFn(true);
-        return;
-      }
-
-      setIsWriteFn(false);
-      return;
-    }
-
-    if (isFailedSimulation) {
-      setSubmissionQueued(false);
-      setIsWriteFn(undefined);
-    }
-  }, [simulateTxData, isSimulationQueued, prepareTxData]);
-
-  useEffect(() => {
-    if (isSimulationQueued && !isFetchingSequenceNumber) {
-      void triggerSimulate();
-    }
-  }, [sequenceNumberData, isFetchingSequenceNumber]);
-
-  const handleChange = (value: SorobanInvokeValue) => {
-    setInvokeError(null);
-    setFormValue(value);
-    resetSimulateTx();
-    resetPrepareTx();
-    resetSubmitRpc();
-  };
-
-  const isSimulating =
-    isLoadingSequenceNumber ||
-    isFetchingSequenceNumber ||
-    isSimulateTxPending ||
-    isPrepareTxPending;
-
-  const resetSubmitState = () => {
-    if (submitRpcError || submitRpcResponse) {
-      resetSubmitRpc();
-    }
-  };
-
-  const resetSimulateState = () => {
-    if (isSimulateTxError || (simulateTxData && "result" in simulateTxData)) {
-      resetSimulateTx();
-    }
-  };
-
-  const handleSimulate = async () => {
-    setInvokeError(null);
-    resetSimulateState();
-    resetSubmitState();
-    resetPrepareTx();
-
-    setSimulationQueued(true);
-
-    await fetchSequenceNumber();
-  };
-
-  const handleSubmit = async () => {
-    setSubmissionQueued(true);
-    return handleSimulate();
-  };
 
   const triggerSubmit = async () => {
     setSubmissionQueued(false);
@@ -357,6 +274,88 @@ export const InvokeContractForm = ({
     }
 
     setSimulationQueued(false);
+  };
+
+  const isSuccessfulSimulation =
+    simulateTxData &&
+    "result" in simulateTxData &&
+    !simulateTxData.result.error;
+
+  const isFailedSimulation =
+    simulateTxData && "result" in simulateTxData && simulateTxData.result.error;
+
+  useEffect(() => {
+    if (isSuccessfulSimulation) {
+      const result =
+        simulateTxData.result as Api.RawSimulateTransactionResponse;
+      const simulationChangesState =
+        result.stateChanges && result.stateChanges.length > 0;
+
+      if (isSubmitQueued && !isSimulationQueued && prepareTxData) {
+        void triggerSubmit();
+      }
+
+      if (simulationChangesState) {
+        setIsWriteFn(true);
+        return;
+      }
+
+      setIsWriteFn(false);
+      return;
+    }
+
+    if (isFailedSimulation) {
+      setSubmissionQueued(false);
+      setIsWriteFn(undefined);
+    }
+  }, [simulateTxData, isSimulationQueued, prepareTxData, isSubmitQueued]);
+
+  useEffect(() => {
+    if (isSimulationQueued && !isFetchingSequenceNumber) {
+      void triggerSimulate();
+    }
+  }, [sequenceNumberData, isFetchingSequenceNumber, isSimulationQueued]);
+
+  const handleChange = (value: SorobanInvokeValue) => {
+    setInvokeError(null);
+    setFormValue(value);
+    resetSimulateTx();
+    resetPrepareTx();
+    resetSubmitRpc();
+  };
+
+  const isSimulating =
+    isLoadingSequenceNumber ||
+    isFetchingSequenceNumber ||
+    isSimulateTxPending ||
+    isPrepareTxPending;
+
+  const resetSubmitState = () => {
+    if (submitRpcError || submitRpcResponse) {
+      resetSubmitRpc();
+    }
+  };
+
+  const resetSimulateState = () => {
+    if (isSimulateTxError || (simulateTxData && "result" in simulateTxData)) {
+      resetSimulateTx();
+    }
+  };
+
+  const handleSimulate = async () => {
+    setInvokeError(null);
+    resetSimulateState();
+    resetSubmitState();
+    resetPrepareTx();
+
+    setSimulationQueued(true);
+
+    await fetchSequenceNumber();
+  };
+
+  const handleSubmit = async () => {
+    setSubmissionQueued(true);
+    return handleSimulate();
   };
 
   const renderReadWriteBadge = (isWriteFn: boolean | undefined) => {
@@ -515,7 +514,7 @@ export const InvokeContractForm = ({
               >
                 <PrettyJsonTransaction
                   json={result}
-                  xdr={result && "xdr" in result}
+                  xdr={"xdr" in result}
                 />
               </div>
             </Box>

@@ -26,17 +26,6 @@ const Debugger: React.FC = () => {
     if (!isLoading && contractKeys.length > 0) {
       if (contractName && contractKeys.includes(contractName)) {
         setSelectedContract(contractName);
-      } else {
-        setSelectedContract(contractKeys[0]);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contractName, isLoading, contractKeys.join(",")]);
-
-  useEffect(() => {
-    if (!isLoading && contractKeys.length > 0) {
-      if (contractName && contractKeys.includes(contractName)) {
-        setSelectedContract(contractName);
       } else if (!contractName) {
         void navigate(`/debug/${contractKeys[0]}`, { replace: true });
       } else {

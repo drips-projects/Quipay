@@ -71,11 +71,12 @@ export const NetworkStatusProvider = ({
   useEffect(() => {
     mountedRef.current = true;
 
-    void refresh();
-
     const interval = setInterval(() => {
       void refresh();
     }, REFRESH_INTERVAL);
+
+    // Initial refresh after setting up interval
+    void refresh();
 
     return () => {
       mountedRef.current = false;

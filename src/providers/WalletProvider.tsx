@@ -105,17 +105,17 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
     [accounts],
   );
 
-  const handleSetAddress = (newAddr: string | undefined) => {
+  const handleSetAddress = useCallback((newAddr: string | undefined) => {
     setAddress(newAddr);
     if (newAddr) {
-      setAccounts((prev) => {
+      setAccounts((prev: string[]) => {
         if (prev.includes(newAddr)) return prev;
         const next = [...prev, newAddr];
         storage.setItem("walletAccounts", next);
         return next;
       });
     }
-  };
+  }, []);
   const [connectionError, setConnectionError] = useState<string | undefined>();
   const popupLock = useRef(false);
 
@@ -149,14 +149,13 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const newBalances = await fetchBalances(address);
-    setBalances((prev) => {
+    setBalances((prev: MappedBalances) => {
       if (deepEqual(newBalances, prev)) return prev;
       return newBalances;
     });
   }, [address]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void updateBalances();
   }, [updateBalances]);
 
@@ -256,7 +255,8 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
       isMounted = false;
       if (timer) clearTimeout(timer);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- it SHOULD only run once per component mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only run once per component mount
+  }, []);
 
   const contextValue = useMemo(
     () => ({
