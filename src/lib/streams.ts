@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 
 export type StreamCurve = "Linear" | "FrontLoaded" | "BackLoaded";
@@ -15,8 +14,8 @@ export interface Stream {
 }
 
 export const fetchStreamById = async (id: string): Promise<Stream> => {
-  const { data } = await axios.get<Stream>(`/api/streams/${id}`);
-  return data;
+  const response = await fetch(`/api/streams/${id}`);
+  return response.json() as Promise<Stream>;
 };
 
 export interface StreamsResponse {
@@ -31,8 +30,8 @@ export const fetchStreams = async (
   const params = new URLSearchParams({ limit: "20" });
   if (cursor) params.append("cursor", cursor);
 
-  const { data } = await axios.get<StreamsResponse>(`/api/streams?${params}`);
-  return data;
+  const response = await fetch(`/api/streams?${params}`);
+  return response.json() as Promise<StreamsResponse>;
 };
 
 export function calculateStreamProgress(stream: Stream, now: number): number {

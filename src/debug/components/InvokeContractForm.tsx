@@ -501,7 +501,10 @@ export const InvokeContractForm = ({
                     : {}),
                 }}
               >
-                <PrettyJsonTransaction json={result} xdr={"xdr" in result} />
+                <PrettyJsonTransaction
+                  json={result}
+                  xdr={"xdr" in result ? (result as { xdr: string }).xdr : ""}
+                />
               </div>
             </Box>
           }
