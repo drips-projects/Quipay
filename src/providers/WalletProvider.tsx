@@ -156,6 +156,7 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
   }, [address]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void updateBalances();
   }, [updateBalances]);
 
@@ -255,7 +256,6 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
       isMounted = false;
       if (timer) clearTimeout(timer);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only run once per component mount
   }, []);
 
   const contextValue = useMemo(

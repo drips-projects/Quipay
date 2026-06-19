@@ -76,6 +76,7 @@ export const NetworkStatusProvider = ({
     }, REFRESH_INTERVAL);
 
     // Initial refresh after setting up interval
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh();
 
     return () => {

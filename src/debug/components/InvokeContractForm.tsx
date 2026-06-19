@@ -173,6 +173,7 @@ export const InvokeContractForm = ({
 
       setDereferencedSchema(schema);
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
   }, [contractSpec, funcName]);
 
   const triggerSubmit = async () => {
@@ -276,6 +277,22 @@ export const InvokeContractForm = ({
     setSimulationQueued(false);
   };
 
+  const handleSimulate = async () => {
+    setInvokeError(null);
+    resetSimulateState();
+    resetSubmitState();
+    resetPrepareTx();
+
+    setSimulationQueued(true);
+
+    await fetchSequenceNumber();
+  };
+
+  const handleSubmit = async () => {
+    setSubmissionQueued(true);
+    return handleSimulate();
+  };
+
   const isSuccessfulSimulation =
     simulateTxData &&
     "result" in simulateTxData &&
@@ -340,22 +357,6 @@ export const InvokeContractForm = ({
     if (isSimulateTxError || (simulateTxData && "result" in simulateTxData)) {
       resetSimulateTx();
     }
-  };
-
-  const handleSimulate = async () => {
-    setInvokeError(null);
-    resetSimulateState();
-    resetSubmitState();
-    resetPrepareTx();
-
-    setSimulationQueued(true);
-
-    await fetchSequenceNumber();
-  };
-
-  const handleSubmit = async () => {
-    setSubmissionQueued(true);
-    return handleSimulate();
   };
 
   const renderReadWriteBadge = (isWriteFn: boolean | undefined) => {
