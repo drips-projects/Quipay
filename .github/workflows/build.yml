@@ -59,11 +59,12 @@ jobs:
       - name: Pull stellar-quickstart image
         run: docker pull stellar/quickstart:testing
       - name: Security audit
-        # --audit-level=critical with --omit=dev: excludes dev dependencies from security checks.
-        # Dev-only tools (shadcn, jest, vite) with critical vulnerabilities don't affect production.
-        # Known unresolvable production criticals as of 2026-06-19: None after moving shadcn to devDependencies.
-        # Remaining high-severity issues in production dependencies are documented and tracked.
-        run: npm audit --omit=dev --audit-level=critical
+        # --audit-level=critical: the one remaining high is xlsx (SheetJS, no upstream fix).
+        # Known unresolvable criticals as of 2026-06-19:
+        # - GHSA-4x5r-pxfx-6jf8: @babel/core <=7.29.0 (requires 7.30.0+, not yet released)
+        # - GHSA-fv7c-fp4j-7gwp: @babel/plugin-transform-modules-systemjs <=7.29.0 (requires 7.30.0+, not yet released)
+        # - Multiple axios CVEs in 1.0.0-1.15.2 range (requires 1.15.3+, not yet released)
+        run: npm audit --audit-level=critical
       - run: npm run lint
       - name: Check formatting
         run: npx prettier . --check --ignore-unknown
