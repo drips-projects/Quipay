@@ -106,7 +106,7 @@ export const useStreams = (workerAddress: string | undefined) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchTick, setFetchTick] = useState(0);
-  
+
   // Move employer name cache into hook scope to ensure it's cleared on wallet disconnect
   const employerNameCacheRef = useRef(new Map<string, string>());
   // Track the previous worker address to detect wallet changes
@@ -116,25 +116,28 @@ export const useStreams = (workerAddress: string | undefined) => {
     setFetchTick((t) => t + 1);
   }, []);
 
-  const resolveEmployerName = useCallback(async (stellarAddress: string): Promise<string> => {
-    const cache = employerNameCacheRef.current;
-    if (cache.has(stellarAddress)) {
-      return cache.get(stellarAddress)!;
-    }
-    try {
-      const res = await fetch(
-        `${API_BASE}/api/employers/by-address?address=${encodeURIComponent(stellarAddress)}`,
-      );
-      const data = (await res.json()) as {
-        employer: { business_name: string } | null;
-      };
-      const name = data.employer?.business_name ?? stellarAddress;
-      cache.set(stellarAddress, name);
-      return name;
-    } catch {
-      return stellarAddress;
-    }
-  }, []);
+  const resolveEmployerName = useCallback(
+    async (stellarAddress: string): Promise<string> => {
+      const cache = employerNameCacheRef.current;
+      if (cache.has(stellarAddress)) {
+        return cache.get(stellarAddress)!;
+      }
+      try {
+        const res = await fetch(
+          `${API_BASE}/api/employers/by-address?address=${encodeURIComponent(stellarAddress)}`,
+        );
+        const data = (await res.json()) as {
+          employer: { business_name: string } | null;
+        };
+        const name = data.employer?.business_name ?? stellarAddress;
+        cache.set(stellarAddress, name);
+        return name;
+      } catch {
+        return stellarAddress;
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     // Clear cache when wallet disconnects OR when wallet address changes
@@ -142,7 +145,7 @@ export const useStreams = (workerAddress: string | undefined) => {
       employerNameCacheRef.current.clear();
       prevWorkerAddressRef.current = workerAddress;
     }
-    
+
     if (!workerAddress) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setStreams([]);
