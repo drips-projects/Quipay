@@ -121,15 +121,7 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
 
   const clearError = useCallback(() => setConnectionError(undefined), []);
 
-  const disconnect = useCallback(async () => {
-    await disconnectWallet();
-    // Clear all cached queries to remove any contract client data
-    queryClient.clear();
-    nullify();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryClient]);
-
-  const nullify = () => {
+  const nullify = useCallback(() => {
     handleSetAddress(undefined);
     setAccounts([]);
     storage.removeItem("walletAccounts");
@@ -140,7 +132,15 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
     storage.setItem("walletAddress", "");
     storage.setItem("walletNetwork", "");
     storage.setItem("networkPassphrase", "");
-  };
+  }, [handleSetAddress]);
+
+  const disconnect = useCallback(async () => {
+    await disconnectWallet();
+    // Clear all cached queries to remove any contract client data
+    queryClient.clear();
+    nullify();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryClient, nullify]);
 
   const updateBalances = useCallback(async () => {
     if (!address) {
@@ -156,6 +156,7 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
   }, [address]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void updateBalances();
   }, [updateBalances]);
 

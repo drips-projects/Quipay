@@ -171,6 +171,7 @@ export const InvokeContractForm = ({
         funcName,
       );
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDereferencedSchema(schema);
     }
   }, [contractSpec, funcName]);
