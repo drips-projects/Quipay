@@ -3,6 +3,9 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "dev": "vite",
     "start": "concurrently --kill-others-on-fail --names stellar,vite -c gray,green --pad-prefix \"stellar scaffold watch --build-clients\" \"vite\"",
@@ -13,7 +16,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier . --write",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "test:e2e": "playwright test --ignore-snapshots",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed --ignore-snapshots",
