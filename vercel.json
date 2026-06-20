@@ -1,7 +1,5 @@
 {
-  "nodeVersion": "22.x",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
-
   "headers": [
     {
       "source": "/assets/(.*)",
