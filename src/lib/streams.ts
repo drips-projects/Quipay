@@ -15,6 +15,7 @@ export interface Stream {
 
 export const fetchStreamById = async (id: string): Promise<Stream> => {
   const response = await fetch(`/api/streams/${id}`);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json() as Promise<Stream>;
 };
 
@@ -31,6 +32,7 @@ export const fetchStreams = async (
   if (cursor) params.append("cursor", cursor);
 
   const response = await fetch(`/api/streams?${params}`);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json() as Promise<StreamsResponse>;
 };
 
